@@ -34,6 +34,7 @@ pred validTiles[p : Pool] {
       }
     }
   }
+  // (#{c: Color, v:Int | p.tiles[c][v] = A} = 3)
 }
 
 pred wellformed {
@@ -46,6 +47,7 @@ pred wellformed {
   }
 }
 
+//may make this so player A has 7 tiles initiallly, or write seperate function
 pred init[p: Pool] {
   // initialize the tile pool to all the tiles
   //each player has 14 tiles in their hand 
@@ -74,25 +76,83 @@ pred drawNewTile[pre, post : Pool, p: Player, color: Color, value: Int] {
 // 1: Must be a run of 3 or more TileValue of all the same TileColor
 // OR
 // 2: 3 or 4 tiles, same TileValue but different TileColor
-// Note: Runs are non-cyclic, aka 1(the lowest number) cannot follow 13(the biggest number)!
+// Note: Runs are non-cyclic, aka 1(the lowest number) cannot follow 7(the biggest number)!
 
-// pred playableSet[ts: Pool] {
-// }
+pred playableSet[color1, color2, color3 : Color, value1, value2, value3 : Int] {
+  (
+    color1 = color2 and color2 = color3 and 
+    consecutiveNumbers[value1, value2, value3])
+  or
+  (
+  value1 = value2 and value2 = value3 and
+  color1 != color2 and color2 != color3 and color1 != color3
+  )
 
-pred canPlayFirstHand {
+}
+
+pred consecutiveNumbers[v1, v2, v3 : Int] {
+  v1 != v2
+  v2 != v3
+  v1 != v3
+  //v1 < v2 < v3
+  v1 < v2 and v2 < v3 => {
+    (subtract[v2, v1] = 1) and (subtract[v3, v2] = 1)
+  }
+  //v1 < v3 < v2
+  v1 < v3 and v3 < v2 => {
+    (subtract[v3, v1] = 1) and (subtract[v2, v3] = 1)
+  }
+  //v2 < v1 < v3
+  v2 < v1 and v1 < v3 => {
+    (subtract[v1, v2] = 1) and (subtract[v3, v1] = 1)
+  }
+  //v2 < v3 < v1
+  v2 < v3 and v3 < v1 => {
+    (subtract[v3, v2] = 1) and (subtract[v1, v3] = 1)
+  }
+  //v3 < v1 < v2
+  v3 < v1 and v1 < v2 => {
+    (subtract[v1, v3] = 1) and (subtract[v2, v1] = 1)
+  }
+  //v3 < v2 < v1
+  v3 < v2 and v2 < v1 => {
+    (subtract[v2, v3] = 1) and (subtract[v1, v2] = 1)
+  }
+}
+
+pred canPlayFirstHand[p: Pool] {
   // some set in the players hand such that
   // playableset[set]
   // AND
   // sum[set] >= 15
+  some color1, color2, color3 : Color, value1, value2, value3 : Int | {
+    playableSet[color1, color2, color3, value1, value2, value3]
+    p.tiles[color1][value1] = A
+    p.tiles[color2][value2] = A
+    p.tiles[color3][value3] = A
+    //adds up to 7
+    add[add[value1, value2], value3] >= 5
+  }
 }
 
-run {
-  some pre, post : Pool, color : Color, value : Int | {
-    // init[pre]
-    wellformed
-    validTiles[pre]
-    validTiles[post]
-    drawNewTile[pre, post, A, color, value]
+// //For find valid draw
+// run {
+//   some pre, post : Pool, color : Color, value : Int | {
+//     // init[pre]
+//     wellformed
+//     validTiles[pre]
+//     validTiles[post]
+//     drawNewTile[pre, post, A, color, value]
+
   
+//   }
+// } for 2 Pool, 4 Color, 4 Int, 1 Player
+
+//For finding valid hand to play
+run {
+  some p : Pool | {
+    wellformed
+    validTiles[p]
+    canPlayFirstHand[p]
   }
-} for 2 Pool, 4 Color, 4 Int, 1 Player
+} for 1 Pool, 4 Color, 4 Int, 1 Player
