@@ -8,6 +8,7 @@ DEVIATIONS FROM STANDARD GAME OF RUMMIKUB:
 5: First move has to add up to 15
 */
 
+//BIG QUESTION: MOST TILES U CAN HAVE WITHOUT MAKING BEING ABLE TO MAKE MOVE
 abstract sig Player {} 
 one sig A extends Player {} //one player for now 
 
@@ -58,6 +59,18 @@ pred init[p: Pool] {
   all color: Color, value: Int | no p.tiles[color][value]
 } 
 
+pred initial_draw {
+  // find some way to restrict value to 1-8
+  // similar to move in tic tac toe
+  // compare player before hand to after hand
+  no pre.tiles[color][value]
+  post.tiles[color][value] = p
+  // //make sure all the others are unchanged
+  all c2 : Color, v2 : Int | (c2!=color or v2!=value) => {
+    post.tiles[c2][v2] = pre.tiles[c2][v2]
+  }
+}
+
 //TODO: make color color sig that just abstracts int
 pred drawNewTile[pre, post : Pool, p: Player, color: Color, value: Int] {
   // find some way to restrict value to 1-8
@@ -79,10 +92,10 @@ pred drawNewTile[pre, post : Pool, p: Player, color: Color, value: Int] {
 // Note: Runs are non-cyclic, aka 1(the lowest number) cannot follow 7(the biggest number)!
 
 pred playableSet[color1, color2, color3 : Color, value1, value2, value3 : Int] {
-  (
-    color1 = color2 and color2 = color3 and 
-    consecutiveNumbers[value1, value2, value3])
-  or
+  // (
+  //   color1 = color2 and color2 = color3 and 
+  //   consecutiveNumbers[value1, value2, value3])
+  // or
   (
   value1 = value2 and value2 = value3 and
   color1 != color2 and color2 != color3 and color1 != color3
@@ -131,7 +144,7 @@ pred canPlayFirstHand[p: Pool] {
     p.tiles[color2][value2] = A
     p.tiles[color3][value3] = A
     //adds up to 7
-    add[add[value1, value2], value3] >= 5
+    add[add[value1, value2], value3] >= 15
   }
 }
 
@@ -148,11 +161,21 @@ pred canPlayFirstHand[p: Pool] {
 //   }
 // } for 2 Pool, 4 Color, 4 Int, 1 Player
 
-//For finding valid hand to play
+// For finding valid hand to play initially
 run {
   some p : Pool | {
     wellformed
     validTiles[p]
     canPlayFirstHand[p]
   }
-} for 1 Pool, 4 Color, 4 Int, 1 Player
+} for 1 Pool, 4 Color, 5 Int, 1 Player
+
+//seeing if we have no shot with 6 cards
+// run {
+//   some p : Pool | {
+//     wellformed
+//     validTiles[p]
+//     not canPlayFirstHand[p]
+//     (#{c: Color, v:Int | p.tiles[c][v] = A} = 6)
+//   }
+// } for 1 Pool, 4 Color, 4 Int, 1 Player
