@@ -8,6 +8,12 @@ DEVIATIONS FROM STANDARD GAME OF RUMMIKUB:
 5: First move has to add up to 15
 */
 
+//Make state sig that connects hands to 
+
+//add win conditions
+
+
+
 //BIG QUESTION: MOST TILES U CAN HAVE WITHOUT MAKING BEING ABLE TO MAKE MOVE
 abstract sig Player {} 
 one sig A extends Player {} //one player for now 
@@ -18,6 +24,11 @@ sig Pool {
     -- None - tile is in the pool, Player - tile is in Player, p's hand
     tiles: pfunc Color -> Int -> Player
 }
+
+// sig State {
+//   curTiles:  one Pool,
+//   next: one State
+// }
 
 abstract sig Color {}
 one sig Red extends Color {}
@@ -35,7 +46,6 @@ pred validTiles[p : Pool] {
       }
     }
   }
-  // (#{c: Color, v:Int | p.tiles[c][v] = A} = 3)
 }
 
 pred wellformed {
@@ -71,6 +81,13 @@ pred initial_draw {
   }
 }
 
+pred canEventuallyPlay {
+  some initialBoard, playableHand : Pool | {
+    init[initialBoard]
+    canPlayFirstHand[playableHand]
+    reachable[playableHand, initialBoard, drawNewTile]
+  }
+}
 //TODO: make color color sig that just abstracts int
 pred drawNewTile[pre, post : Pool, p: Player, color: Color, value: Int] {
   // find some way to restrict value to 1-8
@@ -83,6 +100,12 @@ pred drawNewTile[pre, post : Pool, p: Player, color: Color, value: Int] {
     post.tiles[c2][v2] = pre.tiles[c2][v2]
   }
 }
+
+// pred validTransitions {
+//   all state : State {
+
+//   }
+// }
 
 //Can we play this set of tiles as a valid move?
 //Criteria: 
