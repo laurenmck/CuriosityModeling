@@ -1,107 +1,145 @@
 #lang forge/bsl
 /*
-MODEL OF THE RUMMIKUB SETUP:
-1: Two Players
-2: No repeated tiles [one set of each tile color pair only] & No jokers
-4: Tiles only go up to 7
-5: First move has to add up to 15
+
+For this project, Will and I choose to model a simplified version of the game of Rummikub. Rumikub is a tile-based game 
+for 2 to 4 players and combines elements of the card game rummy and mahjong. For our modeling purposes, we wanted to focus on a 
+specific rule of the game, that is you have to have a hand with a specific number of points to play your first turn. To model 
+these 'first hand' cases in forge, we have made small changes to the origional rules of Rummikub that will be explained in detail below. Enjoy!
+
+-----GAME SET UP-----
+
+**Origional Rummikub**
+- There are 106 tiles [1-13 red, blue, green and yellow (x2) + two jokers] [2-4 players]
+- Game tiles are placed face down in on the table, each player picks up an origional hand of 14 tiles and places their tiles on their rack.
+
+**Forge Rummikub**
+- There are 52 tiles [1-3 red, blue, green and yellow] [2 players]
+- Game tiles are represented by a rxc matrix where rows represent color and cols represent value. Each matrix index will be empty when the game begins.
+  Players will 'pick up tiles' by placing their player name at a rxc matrix index. (ex: tiles[Red][2] = A -> player A has the Red 2 tile in their hand)
+- Each player will start with 7 tiles 
+
+--First Turn--
+
+**Origional Rummikub**
+The first player's initial move must meet a certain requirement:
+-- The player must place tiles on the table that have a total value of at least 30 points.
+-- The tiles placed on the table must form valid set.
+-- The initial meld can consist of one or more sets or runs.
+
+**Forge Rummikub**
+The first player's initial move must meet a certain requirement:
+-- The player must place tiles on the table that have a total value of at least 15 points.
+-- The tiles placed on the table must form either a single valid set. 
+
+--Valid Set--
+
+A valid set is a group or run of tiles
+--RUN: a set of three or more consectutive numbers all in the same color.
+--GROUP: 3 or 4 tiles that have are the same value and are different colors.
 */
 
-//BIG QUESTION: MOST TILES U CAN HAVE WITHOUT MAKING BEING ABLE TO MAKE MOVE
+-- game players 
 abstract sig Player {} 
-one sig A, B extends Player {} //one player for now 
+one sig A, B extends Player {}
 
+-- pool to represent the game tiles 
 sig Pool {
     -- each row represents a tile color [Red, Blue, Green, Yellow]
     -- each col represents a tile value [1 - 7]
-    -- None - tile is in the pool, Player - tile is in Player, p's hand
+    -- tiles[r][c] = None => tile is in the pool 
+    -- tiles[r][c] = A/B => tile is in player A/B's hand
     tiles: pfunc Color -> Int -> Player
 }
 
+-- color to represent the possible tile colors
 abstract sig Color {}
 one sig Red extends Color {}
 one sig Blue extends Color {}
 one sig Green extends Color {}
 one sig Yellow extends Color {}
 
-pred validTiles[p : Pool] {
-  //make sure only one player is on each tile or its empty -- singleton queens 
-  all c : Color | { 
-    all v : Int | {
-      //color is valid (look back at this if there are problems)
-      (v >= 1 and v <= 7) => {
-        no p.tiles[c][v] or p.tiles[c][v] = A or p.tiles[c][v] = B
-      }
-    }
-  }
-  // (#{c: Color, v:Int | p.tiles[c][v] = A} = 3)
-}
-
+/*
+The wellformed predicate rules out garbage tile values: 
+for all tile pools and color/value pairs, the values cannot be less than 1 or greater than 13. We have defined the 
+4 possible color values on the board, so color being [red, blue, green or yellow is implies]
+*/
 pred wellformed {
   all p: Pool | { 
     all color: Color, value: Int | {
-      (value < 1 or value > 7) => {
+      (value < 1 or value > 13) => {
           no p.tiles[color][value]
       }
     } 
   }
 }
 
-//may make this so player A has 7 tiles initiallly, or write seperate function
-pred init[p: Pool] {
-  // initialize the tile pool to all the tiles
-  //each player has 14 tiles in their hand 
-  // have A draw 14 times
-  //no one is anywhere on board 
-  //board is 
+/*
+The validTiles predicate takes in a pool of tiles and indicated is the tiles represented in a valid manner. 
 
+A valid tile is either: 
+1. Empty or in the general pool (tiles.[color][value] = None)
+2. In player A's hand (tiles.[color][value] = A)
+3. In player B's hand (tiles.[color][value] = B)
+
+Two players cannot have the same tile.
+*/
+pred validTiles[p : Pool] {
+  all c : Color | { 
+    all v : Int | {
+      (v >= 1 and v <= 13) => {
+        no p.tiles[c][v] or p.tiles[c][v] = A or p.tiles[c][v] = B
+      }
+    }
+  }
+}
+
+/*
+The init predicate initializes all the game tiles, no player has any tiles at the start of the game.
+*/
+pred init[p: Pool] {
   all color: Color, value: Int | no p.tiles[color][value]
 } 
 
-// pred initial_draw {
-//   // find some way to restrict value to 1-8
-//   // similar to move in tic tac toe
-//   // compare player before hand to after hand
-//   no pre.tiles[color][value]
-//   post.tiles[color][value] = p
-//   // //make sure all the others are unchanged
-//   all c2 : Color, v2 : Int | (c2!=color or v2!=value) => {
-//     post.tiles[c2][v2] = pre.tiles[c2][v2]
-//   }
-
-// }
-
-//TODO: make color color sig that just abstracts int
+/*
+The drawNewTile predicate takes in a pre, post pool, a player and a color, int pair and models the action 
+of a player drawing a new tile into their hand. 
+*/
 pred drawNewTile[pre, post : Pool, p: Player, color: Color, value: Int] {
-  // find some way to restrict value to 1-8
-  // similar to move in tic tac toe
-  // compare player before hand to after hand
+
+  --tile place must be un-claimed before the player can claim that tile
   no pre.tiles[color][value]
   post.tiles[color][value] = p
-  // //make sure all the others are unchanged
+
+  --all other tiles in the pool remain unchanged after this play
   all c2 : Color, v2 : Int | (c2!=color or v2!=value) => {
     post.tiles[c2][v2] = pre.tiles[c2][v2]
   }
 }
 
-//Can we play this set of tiles as a valid move?
+/*
+The playableSet predicate determines if a player can play the input set of tiles as a valid move. To be a valid move 
+
 //Criteria: 
 // 1: Must be a run of 3 or more TileValue of all the same TileColor
 // OR
 // 2: 3 or 4 tiles, same TileValue but different TileColor
 // Note: Runs are non-cyclic, aka 1(the lowest number) cannot follow 7(the biggest number)!
-
+*/
 pred playableSet[color1, color2, color3 : Color, value1, value2, value3 : Int] {
-  // (
-  //   color1 = color2 and color2 = color3 and 
-  //   consecutiveNumbers[value1, value2, value3])
-  // or
+  (
+    color1 = color2 and color2 = color3 and 
+    consecutiveNumbers[value1, value2, value3])
+  or
   (
   value1 = value2 and value2 = value3 and
   color1 != color2 and color2 != color3 and color1 != color3
   )
 }
 
+/*
+The consecutiveNumbers predicate is a helper predicate for playableSet that returns true if
+the inputs v1, v2 and v3 are consecutive numbers.
+*/
 pred consecutiveNumbers[v1, v2, v3 : Int] {
   v1 != v2
   v2 != v3
@@ -132,6 +170,10 @@ pred consecutiveNumbers[v1, v2, v3 : Int] {
   }
 }
 
+/*
+The canPlayFirstHand predicate takes in a pool, player and minimumValue and checks if there are some set of three tiles 
+in the players hand that satifsy the playableSet predicate and add up to the minimumValue requirement for the first turn.
+*/
 pred canPlayFirstHand[p: Pool, player : Player, minimumValue : Int] {
   // some set in the players hand such that
   // playableset[set]
@@ -147,45 +189,21 @@ pred canPlayFirstHand[p: Pool, player : Player, minimumValue : Int] {
   }
 }
 
-// //For find valid draw
-// run {
-//   some pre, post : Pool, color : Color, value : Int | {
-//     // init[pre]
-//     wellformed
-//     validTiles[pre]
-//     validTiles[post]
-//     drawNewTile[pre, post, A, color, value]
-
-  
-//   }
-// } for 2 Pool, 4 Color, 4 Int, 1 Player
-
-// For finding valid hand to play initially
-// run {
-//   some p : Pool | {
-//     wellformed
-//     validTiles[p]
-//     canPlayFirstHand[p, B, 15]
-//     canPlayFirstHand[p, A, 15]
-//   }
-// } for 1 Pool, 4 Color, 5 Int, 2 Player
-
-//find minimum value such that both players cant play
+//Run statement to find minimum value such that both players cant play
 run {
   some minVal : Int | {
     some p : Pool | {
       wellformed
       validTiles[p]
-      canPlayFirstHand[p, A, minVal]
-      not canPlayFirstHand[p, B, minVal]
+      (canPlayFirstHand[p, A, minVal] and not canPlayFirstHand[p, B, minVal]) or (not canPlayFirstHand[p, A, minVal] and canPlayFirstHand[p, B, minVal]) or (canPlayFirstHand[p, A, minVal] and canPlayFirstHand[p, B, minVal])
       (#{c: Color, v:Int | p.tiles[c][v] = A} = #{c: Color, v:Int | p.tiles[c][v] = B})
+      (#{c: Color, v:Int | p.tiles[c][v] = A} >= 7) // must start with at least 7 cards 
       //add so that they both have same number tiles
-
     }
   }
 } for 2 Player, 1 Pool, 4 Color, 5 Int
 
-//seeing if we have no shot with 6 cards
+//Run statement to see if we have no shot with 6 cards
 // run {
 //   some p : Pool | {
 //     wellformed
