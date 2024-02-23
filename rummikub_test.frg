@@ -1,34 +1,182 @@
 #lang forge/bsl
 open "two_player_rummikub.frg"
 
+---------------------------------------WELLFORMED---------------------------------------
+
+pred color_check {
+    all p: Pool, color: Color | {
+        color = Blue or 
+        color = Red or
+        color = Yellow or 
+        color = Green
+    } 
+}
+
+pred value_check {
+    all p: Pool, color: Color, val: Int | {
+            (val < 0) implies
+            no p.tiles[color][val]
+    } 
+}
 
 test suite for wellformed {
   // Fill me in!
+  assert color_check is necessary for wellformed
+  assert value_check is necessary for wellformed
 }
+
+---------------------------------------drawNewTile---------------------------------------
 
 test suite for drawNewTile {
   // Fill me in!
-}
+  // assert board_changed is necessary for drawNewTile
+  // assert player_cnt_increased is necessary for drawNewTile
 
-pred tile_run {
-  some color1, color2, color3 : Color, value1, value2, value3 : Int | {
-    (color1 = color2 and color2 = color3 and 
-    consecutiveNumbers[value1, value2, value3])
+  // some tile must be different btwn pre and post board
+  test expect {
+        dnt_case1: {
+          some pre, post: Pool, p: Player, c: Color, v: Int | {
+            {
+              pre.tiles[c][v] != post.tiles[c][v]
+              drawNewTile[pre, post, p, c, v]
+            }
+        } 
+    } is sat 
+  }
+
+  //after move the number of player p tiles on pre board should be less that that on the post board 
+  test expect {
+        dnt_case2: {
+            some pre, post: Pool, p: Player, c: Color, v: Int | {
+              {
+              #{c: Color, v:Int | pre.tiles[c][v] = p} < #{c: Color, v:Int | post.tiles[c][v] = p}
+              drawNewTile[pre, post, p, c, v]
+              }
+          } 
+      } is sat 
+  }
+
+  //must have placed a new tile 
+  test expect {
+        dnt_case3: {
+            some pre, post: Pool, p: Player, c: Color, v: Int | {
+              {
+              #{c: Color, v:Int | pre.tiles[c][v] = p} = #{c: Color, v:Int | post.tiles[c][v] = p}
+              drawNewTile[pre, post, p, c, v]
+              }
+          } 
+      } is unsat 
   }
 }
 
-pred tile_group {
-  some color1, color2, color3 : Color, value1, value2, value3 : Int | {
-    (color1 != color2 and color2 != color3 and color1 != color3 and
-    value1 = value2 and value2 = value3)
-  }
-}
+---------------------------------------playableSet---------------------------------------
 
 test suite for playableSet {
-  // Fill me in!
-  // assert tile_run is necessary for playableSet[]
-  // assert tile_group is necessary for playableSet
+  //unsat - color and value can't both be equal 
+  test expect {
+        ps_case1: {
+            some c1, c2, c3: Color, v1, v2, v3: Int | 
+            {
+                c1 = c2 
+                c2 = c3
+                v1 = v2 
+                v2 = v3
+                playableSet[c1, c2, c3, v1, v2, v3]
+            }
+        } is unsat 
+  }
+
+  //unsat - consecutive number but colors not equal
+  test expect {
+        ps_case2: {
+            some c1, c2, c3: Color, v1, v2, v3: Int | 
+            {
+                c1 != c2 
+                c2 = c3
+                consecutiveNumbers[v1, v2, v3]
+                playableSet[c1, c2, c3, v1, v2, v3]
+            }
+        } is unsat 
+  }
+
+  //unsat - numbers same but one of the colors is the same
+  test expect {
+        ps_case3: {
+            some c1, c2, c3: Color, v1, v2, v3: Int | 
+            {
+                c1 != c2 
+                c1 != c3
+                c2 = c3
+                v1 = v2
+                v2 = v3
+                playableSet[c1, c2, c3, v1, v2, v3]
+            }
+        } is unsat 
+  }
+
+  //sat - color not equal and value is  
+  test expect {
+        ps_case4: {
+            some c1, c2, c3: Color, v1, v2, v3: Int | 
+            {
+                c1 != c2 
+                c2 != c3
+                c3 != c1
+                v1 = v2 
+                v2 = v3
+                playableSet[c1, c2, c3, v1, v2, v3]
+            }
+        } is sat 
+  }
+
+   //sat - color equal and values increasing  
+  test expect {
+        ps_case5: {
+            some c1, c2, c3: Color, v1, v2, v3: Int | 
+            {
+                c1 = c2 
+                c2 = c3
+                c3 = c1
+                v2 = add[v1, 1]
+                v3 = add[v2, 1]
+                playableSet[c1, c2, c3, v1, v2, v3]
+
+            }
+        } is sat 
+  }
+
+   //sat - color equal and values decreasing  
+  test expect {
+        ps_case6: {
+            some c1, c2, c3: Color, v1, v2, v3: Int | 
+            {
+              c1 = c2 
+              c2 = c3
+              c3 = c1
+              v2 = subtract[v1, 1]
+              v3 = subtract[v2, 1]
+              playableSet[c1, c2, c3, v1, v2, v3]
+            }
+        } is sat 
+  }
+
+   //sat - colors equal & consecutiveNumbers numbers
+  test expect {
+        ps_case7: {
+            some c1, c2, c3: Color, v1, v2, v3: Int | 
+            {
+              c1 = c2 
+              c2 = c3
+              c3 = c1
+              consecutiveNumbers[v1, v2, v3]
+              playableSet[c1, c2, c3, v1, v2, v3]
+
+            }
+        } is sat 
+  }
 }
+
+---------------------------------------consecutiveNumbers---------------------------------------
 
 test suite for consecutiveNumbers {
   //basic accending / decending / pos / neg tests : SAT
@@ -57,6 +205,8 @@ test suite for consecutiveNumbers {
   //v3 < v2 < v1
   test expect { case_6: {consecutiveNumbers[12, 11, 10]} is sat }
 }
+
+---------------------------------------canPlayFirstHand---------------------------------------
 
 test suite for canPlayFirstHand {
     // Fill me in!

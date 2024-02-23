@@ -189,6 +189,25 @@ pred canPlayFirstHand[p: Pool, player : Player, minimumValue : Int] {
   }
 }
 
+pred winningHand[p: Pool, w: Player] { //can play all tiles in a set or play 
+  all disj color1, color2, color3 : Color, value1, value2, value3 : Int | {
+      (p.tiles[color1][value1] = w and 
+      p.tiles[color2][value2] = w and
+      p.tiles[color3][value3] = w) => playableSet[color1, color2, color3, value1, value2, value3]
+      //adds up to 7
+  }  
+}
+
+//Run statement to fund hand where someone wins
+// run {
+//   some p: Pool | {
+//     wellformed
+//     validTiles[p]
+//     canPlayFirstHand[p, A, 6]
+//     // winningHand[p, A]
+//   }
+// }
+
 //Run statement to find minimum value such that both players cant play
 run {
   some minVal : Int | {
