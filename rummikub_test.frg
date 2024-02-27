@@ -1,6 +1,9 @@
 #lang forge/bsl
 open "two_player_rummikub.frg"
 
+-----------------------------------------INIT------------------------------------------
+assert all p: Pool | init[p] is sufficient for aturn[p] 
+
 ---------------------------------------WELLFORMED---------------------------------------
 
 pred color_check {
@@ -24,6 +27,15 @@ test suite for wellformed {
   assert color_check is necessary for wellformed
   assert value_check is necessary for wellformed
 }
+
+// assert all pre, post: Pool, color: Color, value: Int, p: Player | 
+//   drawNewTile[pre, post, p, color, value] is sufficient for balanced[post]
+//     for 2 Pool, 4 Int
+
+
+// test suite for init{
+//     assert all p: Pool | init[p] is sufficient for xturn[p]
+// }
 
 ---------------------------------------drawNewTile---------------------------------------
 
@@ -68,7 +80,6 @@ test suite for drawNewTile {
       } is unsat 
   }
 }
-
 ---------------------------------------playableSet---------------------------------------
 
 test suite for playableSet {
@@ -209,7 +220,6 @@ test suite for consecutiveNumbers {
 ---------------------------------------canPlayFirstHand---------------------------------------
 
 test suite for canPlayFirstHand {
-    // Fill me in!
-
+    //fill in friday post midterm
 }
 

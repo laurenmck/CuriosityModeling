@@ -65,7 +65,6 @@ pred init[p: Pool] {
   // have A draw 14 times
   //no one is anywhere on board 
   //board is 
-
   all color: Color, value: Int | no p.tiles[color][value]
 } 
 

@@ -1,7 +1,7 @@
 #lang forge/bsl
 /*
 
-For this project, Will and I choose to model a simplified version of the game of Rummikub. Rumikub is a tile-based game 
+For this project, we choose to model a simplified version of the game of Rummikub. Rumikub is a tile-based game 
 for 2 to 4 players and combines elements of the card game rummy and mahjong. For our modeling purposes, we wanted to focus on a 
 specific rule of the game, that is you have to have a hand with a specific number of points to play your first turn. To model 
 these 'first hand' cases in forge, we have made small changes to the origional rules of Rummikub that will be explained in detail below. Enjoy!
@@ -21,7 +21,7 @@ these 'first hand' cases in forge, we have made small changes to the origional r
 --First Turn--
 
 **Origional Rummikub**
-The first player's initial move must meet a certain requirement:
+The first player's initial move must meet certain requirements:
 -- The player must place tiles on the table that have a total value of at least 30 points.
 -- The tiles placed on the table must form valid set.
 -- The initial meld can consist of one or more sets or runs.
@@ -36,6 +36,12 @@ The first player's initial move must meet a certain requirement:
 A valid set is a group or run of tiles
 --RUN: a set of three or more consectutive numbers all in the same color.
 --GROUP: 3 or 4 tiles that have are the same value and are different colors.
+
+--Big Questoin--
+
+A big part of the game Rummikub is the aspect of manupulation, when both players have been able to play their first hand, they can add to or restructure 
+the tiles on the board when attempting to play all the tiles in their hand. Modeling this idea of manupulation is complex; however, modeling first turn scenarios
+which start this process is an important step to understanding modeling the full game.
 */
 
 -- game players 
@@ -127,8 +133,9 @@ The playableSet predicate determines if a player can play the input set of tiles
 */
 pred playableSet[color1, color2, color3 : Color, value1, value2, value3 : Int] {
   (
-    color1 = color2 and color2 = color3 and 
-    consecutiveNumbers[value1, value2, value3])
+  color1 = color2 and color2 = color3 and 
+  consecutiveNumbers[value1, value2, value3]
+  )
   or
   (
   value1 = value2 and value2 = value3 and
@@ -171,6 +178,37 @@ pred consecutiveNumbers[v1, v2, v3 : Int] {
 }
 
 /*
+The three predicates below aturn, bturn and balanced ensure that in a pre-first turn game the tile number between players is balanced. 
+A game will only be ballanced in a pre first turn game, where players cannot place their first hand so they must draw a new tile on their turn.
+*/
+pred aturn[p: Pool] {
+    #{c: Color, v:Int | p.tiles[c][v] = A}
+    = 
+    #{c: Color, v:Int | p.tiles[c][v] = B}
+}
+
+pred bturn[p: Pool] {
+     #{c: Color, v:Int | p.tiles[c][v] = A}
+    = 
+    add[#{c: Color, v:Int | p.tiles[c][v] = B}, 1]
+}
+
+pred balanced[p: Pool] {
+    aturn[p] or bturn[p]
+}
+
+/*
+This predicate declares an origional hand for the game, where each player chooses 7 random tiles from the pool into their hand
+*/
+pred origionalHand[p: Pool] {
+  #{c: Color, v:Int | p.tiles[c][v] = B} = 7
+  #{c: Color, v:Int | p.tiles[c][v] = A} = 7
+}
+
+// // pred emptyBoard[b: Board] { all r, c: Int | no b.board[r][c] }
+// assert all p: Pool | init[p] is sufficient for aturn[p]
+
+/*
 The canPlayFirstHand predicate takes in a pool, player and minimumValue and checks if there are some set of three tiles 
 in the players hand that satifsy the playableSet predicate and add up to the minimumValue requirement for the first turn.
 */
@@ -184,50 +222,49 @@ pred canPlayFirstHand[p: Pool, player : Player, minimumValue : Int] {
     p.tiles[color1][value1] = player
     p.tiles[color2][value2] = player
     p.tiles[color3][value3] = player
-    //adds up to 7
+       
     add[add[value1, value2], value3] >= minimumValue
   }
 }
 
-pred winningHand[p: Pool, w: Player] { //can play all tiles in a set or play 
-  all disj color1, color2, color3 : Color, value1, value2, value3 : Int | {
-      (p.tiles[color1][value1] = w and 
-      p.tiles[color2][value2] = w and
-      p.tiles[color3][value3] = w) => playableSet[color1, color2, color3, value1, value2, value3]
-      //adds up to 7
-  }  
-}
+/*
+this run statement finds some set of tiles where player A can play their first hand and player B cannot,
+the specified minVal of 15 specificed in the rules at the top is not infoced here, instead we let forge define
+the minVal.
 
-//Run statement to fund hand where someone wins
+--NOTE: the runtime for not canPlayFirstHand[p, B, minVal] is very long, it will work but it will take quite a bit
+*/
+// run {
+//   some minVal : Int | {
+//     some p : Pool | {
+//       wellformed
+//       balanced[p]
+//       validTiles[p]
+//       canPlayFirstHand[p, A, minVal]
+//       not canPlayFirstHand[p, B, minVal] 
+//     }
+//   }
+// } for 2 Player, 1 Pool, 4 Color, 5 Int
+
+//run statement to define any random initial hands for the two players 
 // run {
 //   some p: Pool | {
 //     wellformed
-//     validTiles[p]
-//     canPlayFirstHand[p, A, 6]
-//     // winningHand[p, A]
+//     origionalHand[p]
 //   }
-// }
+// } for 1 Pool, 4 Color, 5 Int, 2 Player
 
-//Run statement to find minimum value such that both players cant play
-run {
-  some minVal : Int | {
-    some p : Pool | {
-      wellformed
-      validTiles[p]
-      (canPlayFirstHand[p, A, minVal] and not canPlayFirstHand[p, B, minVal]) or (not canPlayFirstHand[p, A, minVal] and canPlayFirstHand[p, B, minVal]) or (canPlayFirstHand[p, A, minVal] and canPlayFirstHand[p, B, minVal])
-      (#{c: Color, v:Int | p.tiles[c][v] = A} = #{c: Color, v:Int | p.tiles[c][v] = B})
-      (#{c: Color, v:Int | p.tiles[c][v] = A} >= 7) // must start with at least 7 cards 
-      //add so that they both have same number tiles
-    }
-  }
-} for 2 Player, 1 Pool, 4 Color, 5 Int
-
-//Run statement to see if we have no shot with 6 cards
+/*
+Finds a scenario where there is some pre board where player A can't play their first hand, they draw a new tile, 
+and in the post board scenario player A can play their first hand. 
+*/
 // run {
-//   some p : Pool | {
+//   some pre, post: Pool, v: Int, c: Color | {
 //     wellformed
-//     validTiles[p]
-//     not canPlayFirstHand[p]
-//     (#{c: Color, v:Int | p.tiles[c][v] = A} = 6)
+//     origionalHand[pre]
+//     not canPlayFirstHand[pre, A, 15]
+//     drawNewTile[pre, post, A, c, v]
+//     canPlayFirstHand[post, A, 15]
+
 //   }
-// } for 1 Pool, 4 Color, 4 Int, 1 Player
+// } for 2 Pool, 4 Color, 5 Int, 2 Player
