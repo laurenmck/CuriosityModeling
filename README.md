@@ -2,14 +2,14 @@
 <ln/>
 
 ## Project Objective: 
-### What are you trying to model?* 
+### What are you trying to model? 
 
 For this project, we choose to model a simplified version of the game of <b> Rummikub </b>. Rumikub is a tile-based game 
 for 2 to 4 players and combines elements of the card game rummy and mahjong. For our modeling purposes, we wanted to focus on a 
 specific rule of the game: you have to have a hand with a specific number of points to play your first turn. To model 
 these 'first hand' cases in Froglet, we have made small changes to the original rules of Rummikub that will be explained in detail below. Enjoy!
 
-### Include a brief description that would give someone unfamiliar with the topic a basic understanding of your goal.
+### Helpful Context: Rummikub vs. Froglet Rummikub Rules and Gameplay
 
 ##### Game Setup
 ###### Origional Rummikub
@@ -39,15 +39,30 @@ A valid set is a group or run of tiles
 --<b>RUN</b>: a set of three or more consectutive numbers all in the same color.
 --<b>GROUP</b>: 3 or 4 tiles that have are the same value and are different colors.
 
+To view the full rules of the game please visit [this](https://rummikub.com/wp-content/uploads/2019/12/2600-English-1.pdf) site. 
+
 ### Our BIG Question
-A big part of the game Rummikub is the aspect of manupulation, when both players have been able to play their first hand, they can add to or restructure 
-the tiles on the board when attempting to play all the tiles in their hand. Modeling this idea of manupulation is complex; however, modeling first turn scenarios
-which start this process is an important step to understanding modeling the full game.
+A big part of the game Rummikub is the aspect of manipulation, when both players have been able to play their first hand, they can add to or restructure 
+the tiles on the board when attempting to play all the tiles in their hand. Modeling this idea of manipulation is complex; however, modeling first turn scenarios
+which start this process is an important step to understanding modeling the full game. The purpose of this project is to get a better understanding of these first-turn 
+scenarios, which can happen at any point in the game after the original hand tiles are chosen!  
+
+<ln/>
 
 ### Model Design and Visualization: 
-Give an overview of your model design choices, what checks or run statements you wrote, and what we should expect to see from an instance produced by the Sterling visualizer. 
-How should we look at and interpret an instance created by your spec? 
-Did you create a custom visualization, or did you use the default?
+#### Model Design Choices
+
+###### Rummikub
+In the Rummikub game, game tiles are placed face down on the table in a 'tile pool'. Players then randomly choose tiles and place the tile on their 'tray' to represent their hand. This setup is visually shown in the image below
+![Rummikub Setup](rumikub_setup.jpeg)
+
+###### Froglet Rummikub
+To model this setup in Froglet Rummikub, we use an n (color) x m (value) matrix to represent all the tiles in a game. Within the matrix, if a specific color+value tile has nothing at its rxc position <pool.tiles[color][value] = null>, the tile is in the 'tile pool'. If the rxc position has a player in the position <pool.tiles[color][value] = B> or <pool.tiles[color][value] = A>, the tile is in the perspective player's 'tray' or hand. A visual representation with a sterling visualizer example in Forge/Froglet is provided below.
+![Forgeex](forge_ex.jpeg)
+
+#### Run Statements 
+
+#### How should we look at and interpret an instance created by your spec | Sterling visualizer | Did you create a custom visualization, or did you use the default?
 
 ### Signatures and Predicates: 
 At a high level, what do each of your sigs and preds represent in the context of the model? Justify the purpose for their existence and how they fit together.
