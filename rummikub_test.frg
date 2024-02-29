@@ -28,15 +28,6 @@ test suite for wellformed {
   assert value_check is necessary for wellformed
 }
 
-// assert all pre, post: Pool, color: Color, value: Int, p: Player | 
-//   drawNewTile[pre, post, p, color, value] is sufficient for balanced[post]
-//     for 2 Pool, 4 Int
-
-
-// test suite for init{
-//     assert all p: Pool | init[p] is sufficient for xturn[p]
-// }
-
 ---------------------------------------drawNewTile---------------------------------------
 
 test suite for drawNewTile {
@@ -181,7 +172,6 @@ test suite for playableSet {
               c3 = c1
               consecutiveNumbers[v1, v2, v3]
               playableSet[c1, c2, c3, v1, v2, v3]
-
             }
         } is sat 
   }
@@ -220,6 +210,60 @@ test suite for consecutiveNumbers {
 ---------------------------------------canPlayFirstHand---------------------------------------
 
 test suite for canPlayFirstHand {
-    //fill in friday post midterm
+    /*
+    Same funciton as playableSet but with added minimumValue requirement - many of playableSet tests cover this functionality 
+    so we just need to test that the additional minVal requirement 
+    */
+
+
+    //Simple test case - if its a playable set that has values > or = to the min val then it satisfies canPlayFirstHand
+    test expect {
+        cpfh_case1: {
+            some p:Pool, player: Player, c1, c2, c3: Color, v1, v2, v3: Int | 
+            {
+              playableSet[c1, c2, c3, v1, v2, v3]
+              add[add[v1, v2], v3] >= 15
+              canPlayFirstHand[p, player, 15]
+            }
+        } is sat 
+    }
+
+    //Playable set but dosent meet min val
+    test expect {
+        cpfh_case2: {
+            some p:Pool, player: Player, c1, c2, c3: Color, v1, v2, v3: Int | 
+            {
+              wellformed
+              playableSet[c1, c2, c3, v1, v2, v3]
+              add[add[v1, v2], v3] <= 10
+              canPlayFirstHand[p, player, 10]
+            }
+        } is unsat 
+    }
+
+    //If not playable set then can not play first hand 
+    test expect {
+        cpfh_case3: {
+            some p:Pool, player: Player, c1, c2, c3: Color, v1, v2, v3: Int | 
+            {
+              wellformed
+              not playableSet[c1, c2, c3, v1, v2, v3]
+              canPlayFirstHand[p, player, 10]
+            }
+        } is unsat 
+    }
+
+    //If not playable set then can not play first hand even if v1-v3 meet the min value 
+    test expect {
+        cpfh_case4: {
+            some p:Pool, player: Player, c1, c2, c3: Color, v1, v2, v3: Int | 
+            {
+              wellformed
+              not playableSet[c1, c2, c3, v1, v2, v3]
+              add[add[v1, v2], v3] >= 15
+              canPlayFirstHand[p, player, 10]
+            }
+        } is unsat 
+    }
 }
 
