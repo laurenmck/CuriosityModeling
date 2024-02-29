@@ -1,15 +1,15 @@
 # Logic 4 Systems: Curiosity Modeling by @lmckeown and @wbednarz #
 <ln/>
 
-### Project Objective: 
-*What are you trying to model?* 
+## Project Objective: 
+### What are you trying to model?* 
 
 For this project, we choose to model a simplified version of the game of <b> Rummikub </b>. Rumikub is a tile-based game 
 for 2 to 4 players and combines elements of the card game rummy and mahjong. For our modeling purposes, we wanted to focus on a 
 specific rule of the game: you have to have a hand with a specific number of points to play your first turn. To model 
 these 'first hand' cases in Froglet, we have made small changes to the original rules of Rummikub that will be explained in detail below. Enjoy!
 
-*Include a brief description that would give someone unfamiliar with the topic a basic understanding of your goal.*
+### Include a brief description that would give someone unfamiliar with the topic a basic understanding of your goal.
 
 ##### Game Setup
 ###### Origional Rummikub
