@@ -1,3 +1,8 @@
+# @lmckeown and @Wbednarz Curiosity Modeling
+
+<ln/>
+
+
 Project Objective: 
 What are you trying to model? Include a brief description that would give someone unfamiliar with the topic a basic understanding of your goal.
 
