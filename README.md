@@ -41,7 +41,7 @@ A valid set is a group or run of tiles
 
 To view the full rules of the game please visit [this](https://rummikub.com/wp-content/uploads/2019/12/2600-English-1.pdf) site. 
 
-### Our BIG Question
+## Our BIG Question
 A big part of the game Rummikub is the aspect of manipulation, when both players have been able to play their first hand, they can add to or restructure 
 the tiles on the board when attempting to play all the tiles in their hand. Modeling this idea of manipulation is complex; however, modeling first turn scenarios
 which start this process is an important step to understanding modeling the full game. The purpose of this project is to get a better understanding of these first-turn 
@@ -49,8 +49,8 @@ scenarios, which can happen at any point in the game after the original hand til
 
 <ln/>
 
-### Model Design and Visualization: 
-#### Model Design Choices
+## Model Design and Visualization: 
+### Model Design Choices
 
 ###### Rummikub
 In the Rummikub game, game tiles are placed face down on the table in a 'tile pool'. Players then randomly choose tiles and place the tile on their 'tray' to represent their hand. This setup is visually shown in the image below
@@ -81,7 +81,7 @@ Run Statement #5 finds a scenario where both players A and B can play their firs
 
 NOTE: for this project, we did not create a custom visualizer
 
-### Signatures and Predicates: 
+## Signatures and Predicates: 
 We have 3 defined sigs and 11 predicates that make up our Rummikub game. They are all documented in detail in the two_player_rummikub.frg but we give a quick overview of the functions here. 
 
 ###### Sigs
@@ -104,5 +104,5 @@ We have 3 defined sigs and 11 predicates that make up our Rummikub game. They ar
 - consecutiveNumbers: a helper function for canPlayFirstHand that takes in three values and determines if they are consecutive
 - aturn, turn, and balanced: these predicates all take in a p, pool and are used to ensure that in a pre-first-turn game, each player has the same number of tiles and the game is 'balanced'. These predicates were taken from the in-class tic-tac-toe example.
 
-### Testing:  
+## Testing:  
 We comprehensively tested each predicate to ensure our game was working as intended. At a high level, we used test expect blocks and assert statements to check for edge cases and expected behavior. More specific info relating to each predicate can be found in the rummikub_test.frg file. 
