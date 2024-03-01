@@ -61,7 +61,7 @@ To model this setup in Froglet Rummikub, we use an n (color) x m (value) matrix 
 ![Forgeex](forge_ex.jpg)
 
 #### Run Statements 
-There are three run statements, each which model a unique aspect of our Rummikub game. 
+There are five run statements, each which model a unique aspect of our Rummikub game. 
 
 ###### Run Statement 1
 Run statement #1 finds a scenario for which there is a wellformed, balanced board that for some min value requirement player A can play a hand and player B cannot. 
