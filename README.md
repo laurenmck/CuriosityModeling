@@ -57,7 +57,7 @@ In the Rummikub game, game tiles are placed face down on the table in a 'tile po
 ![Rummikub Setup](rumikub_setup.jpeg)
 
 ###### Froglet Rummikub
-To model this setup in Froglet Rummikub, we use an n (color) x m (value) matrix to represent all the tiles in a game. Within the matrix, if a specific color+value tile has nothing at its rxc position <pool.tiles[color][value] = null>, the tile is in the 'tile pool'. If the rxc position has a player in the position <pool.tiles[color][value] = B> or <pool.tiles[color][value] = A>, the tile is in the perspective player's 'tray' or hand. A visual representation with a sterling visualizer example in Forge/Froglet is provided below.
+To model this setup in Froglet Rummikub, we use an n (color) x m (value) matrix to represent all the tiles in a game. Within the matrix, if a specific color+value tile has nothing at its rxc position '''pool.tiles[color][value] = null''', the tile is in the 'tile pool'. If the rxc position has a player in the position '''pool.tiles[color][value] = B''' or '''pool.tiles[color][value] = A''', the tile is in the perspective player's 'tray' or hand. A visual representation with a sterling visualizer example in Forge/Froglet is provided below.
 ![Forgeex](forge_ex.jpeg)
 
 #### Run Statements 
