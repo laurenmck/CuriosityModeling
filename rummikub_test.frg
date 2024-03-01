@@ -3,9 +3,8 @@ open "two_player_rummikub.frg"
 
 -----------------------------------------INIT------------------------------------------
 assert all p: Pool | init[p] is sufficient for aturn[p] 
-
 ---------------------------------------WELLFORMED---------------------------------------
-
+//colors in a wellformed board must be of specified val
 pred color_check {
     all p: Pool, color: Color | {
         color = Blue or 
@@ -15,6 +14,7 @@ pred color_check {
     } 
 }
 
+//values must be above 0 in wellformed board 
 pred value_check {
     all p: Pool, color: Color, val: Int | {
             (val < 0) implies
@@ -23,7 +23,6 @@ pred value_check {
 }
 
 test suite for wellformed {
-  // Fill me in!
   assert color_check is necessary for wellformed
   assert value_check is necessary for wellformed
 }
@@ -31,7 +30,6 @@ test suite for wellformed {
 ---------------------------------------drawNewTile---------------------------------------
 
 test suite for drawNewTile {
-  // Fill me in!
   // assert board_changed is necessary for drawNewTile
   // assert player_cnt_increased is necessary for drawNewTile
 

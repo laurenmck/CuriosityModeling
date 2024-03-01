@@ -228,12 +228,14 @@ pred canPlayFirstHand[p: Pool, player : Player, minimumValue : Int] {
 }
 
 /*
+-----------------------------------------Run Statement #1------------------------------------------
 this run statement finds some set of tiles where player A can play their first hand and player B cannot,
 the specified minVal of 15 specificed in the rules at the top is not infoced here, instead we let forge define
 the minVal.
-
---NOTE: the runtime for not canPlayFirstHand[p, B, minVal] is very long, it will work but it will take quite a bit
+-- NOTE: the runtime for not canPlayFirstHand[p, B, minVal] is very long, it will work but it will take quite a bit. The origionalHand pred, 
+whcih notes that each player must have 7 tiles in their hand is excluded here for run time purposes. 
 */
+
 // run {
 //   some minVal : Int | {
 //     some p : Pool | {
@@ -246,7 +248,9 @@ the minVal.
 //   }
 // } for 2 Player, 1 Pool, 4 Color, 5 Int
 
-//run statement to define any random initial hands for the two players 
+-----------------------------------------Run Statement #2------------------------------------------
+// run statement to define any random initial hands for the two players 
+
 // run {
 //   some p: Pool | {
 //     wellformed
@@ -254,10 +258,12 @@ the minVal.
 //   }
 // } for 1 Pool, 4 Color, 5 Int, 2 Player
 
+-----------------------------------------Run Statement #3------------------------------------------
 /*
 Finds a scenario where there is some pre board where player A can't play their first hand, they draw a new tile, 
 and in the post board scenario player A can play their first hand. 
 */
+
 // run {
 //   some pre, post: Pool, v: Int, c: Color | {
 //     wellformed
@@ -268,3 +274,35 @@ and in the post board scenario player A can play their first hand.
 
 //   }
 // } for 2 Pool, 4 Color, 5 Int, 2 Player
+
+-----------------------------------------Run Statement #4------------------------------------------
+/*
+finds a scenario where both players A and B can play their first hand down from their original 7-card hands. 
+*/
+
+// run {
+//   some p: Pool, v: Int, c: Color | {
+//     wellformed
+//     balanced[p]
+//     origionalHand[p]
+//     canPlayFirstHand[p, A, 15]
+//     canPlayFirstHand[p, B, 15]
+
+//   }
+// } for 1 Pool, 4 Color, 5 Int, 2 Player
+
+-----------------------------------------Run Statement #5------------------------------------------
+/*
+Run Statement #5 finds a scenario where both players A and B can play their first hand, however it does not have to come from their original 7 hands they can have drawn more tiles
+*/
+
+// run {
+//   some p: Pool, v: Int, c: Color | {
+//     wellformed
+//     balanced[p]
+//     #{c: Color, v:Int | p.tiles[c][v] = B} >= 7
+//     #{c: Color, v:Int | p.tiles[c][v] = A} >= 7
+//     canPlayFirstHand[p, A, 15]
+//     canPlayFirstHand[p, B, 15]
+//   }
+// } for 1 Pool, 4 Color, 5 Int, 2 Player

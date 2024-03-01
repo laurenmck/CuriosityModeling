@@ -12,8 +12,6 @@ DEVIATIONS FROM STANDARD GAME OF RUMMIKUB:
 
 //add win conditions
 
-
-
 //BIG QUESTION: MOST TILES U CAN HAVE WITHOUT MAKING BEING ABLE TO MAKE MOVE
 abstract sig Player {} 
 one sig A extends Player {} //one player for now 
