@@ -57,18 +57,52 @@ In the Rummikub game, game tiles are placed face down on the table in a 'tile po
 ![Rummikub Setup](rumikub_setup.jpeg)
 
 ###### Froglet Rummikub
-To model this setup in Froglet Rummikub, we use an n (color) x m (value) matrix to represent all the tiles in a game. Within the matrix, if a specific color+value tile has nothing at its rxc position '''pool.tiles[color][value] = null''', the tile is in the 'tile pool'. If the rxc position has a player in the position ~~~pool.tiles[color][value] = B~~~ or ~~~pool.tiles[color][value] = A~~~, the tile is in the perspective player's 'tray' or hand. A visual representation with a sterling visualizer example in Forge/Froglet is provided below.
-![Forgeex](forge_ex.jpeg)
+To model this setup in Froglet Rummikub, we use an n (color) x m (value) matrix to represent all the tiles in a game. Within the matrix, if a specific color+value tile has nothing at its rxc position [pool.tiles[color][value] = null], the tile is in the 'tile pool'. If the rxc position has a player in the position [pool.tiles[color][value] = B] or [pool.tiles[color][value] = A], the tile is in the perspective player's 'tray' or hand. A visual representation with a sterling visualizer example in Forge/Froglet is provided below. This example explains how to interpret the Sterling visualizer output. 
+![Forgeex](forge_ex.jpg)
 
 #### Run Statements 
+There are three run statements, each which model a unique aspect of our Rummikub game. 
 
-#### How should we look at and interpret an instance created by your spec | Sterling visualizer | Did you create a custom visualization, or did you use the default?
+###### Run Statement 1
+Run statement #1 finds a scenario for which there is a wellformed, balanced board that for some min value requirement player A can play a hand and player B cannot. 
+
+###### Run Statement 2
+Run statement #2 finds a scenario where player A and B have just drawn their first 7 tiles from the pool. 
+
+###### Run Statement 3
+Run Statement #3 finds a scenario where there is some pre-board where player A can't play their first hand, they draw a new tile, 
+and in the post-board scenario player A can play their first hand.
+
+###### Run Statement 4 
+Run Statement #4 finds a scenario where both players A and B can play their first hand down from their original 7-card hands. 
+
+###### Run Statement 5 
+Run Statement #5 finds a scenario where both players A and B can play their first hand, however, it does not have to come from their original 7 hands they can have drawn more tiles
+
+NOTE: for this project, we did not create a custom visualizer
 
 ### Signatures and Predicates: 
-At a high level, what do each of your sigs and preds represent in the context of the model? Justify the purpose for their existence and how they fit together.
+We have 3 defined sigs and 11 predicates that make up our Rummikub game. They are all documented in detail in the two_player_rummikub.frg but we give a quick overview of the functions here. 
+
+###### Sigs
+- the player sig is abstract and we define two game players; player A and B
+- the pool sig has a tiles field and represents the tiles used in the game and the game board 
+- the color sig is abstract and represents the tile colors. We define 4 tile colors; Red, Blue, Green, and Yellow.
+
+###### Game Board Predicates 
+- wellformed: wellformed rules out garbage board options that have row and col values that are less than 0
+- validTiles: takes in a p, pool and ensures that a tile is either claimed by one or no players. This ensures that two players do not have the same tile during gameplay.
+- init: takes in a p, pool and declares an empty 4x13 matrix to start a game - all the tiles are in the pool 'turned over' in this scenario
+- origionalHand: takes in a p, pool and declares a situation where each player has chosen their original 7 tiles from the pool
+
+###### Player Action Predicates 
+- playableSet: takes in three color, value pairs and determines if they make a playable set or run; a run is a set of three or more consecutive numbers all in the same color and a set is 3 or 4 tiles that have the same value and are different colors.
+- canPlayFirstHand: takes in a p, pool a player, Player, and a minminimumValue, Int and determines if the player has cards in his hand that satisfy the Rummikub first-hand requirements - that is they have a playableSet that add up to the minminimumValue input. 
+- drawNewTile: takes in a pre, post, Pool, a player, Player a color, Color and a value, Int, and adds the specified (c, v) tile to the player's hand.  
+
+###### Additional Helper Predicates 
+- consecutiveNumbers: a helper function for canPlayFirstHand that takes in three values and determines if they are consecutive
+- aturn, turn, and balanced: these predicates all take in a p, pool and are used to ensure that in a pre-first-turn game, each player has the same number of tiles and the game is 'balanced'. These predicates were taken from the in-class tic-tac-toe example.
 
 ### Testing:  
-What tests did you write to test your model itself? What tests did you write to verify properties about your domain area? Feel free to give a high-level overview of this.
-
-### Documentation:  
-Make sure your model and test files are well-documented. This will help in understanding the structure and logic of your project.
+We comprehensively tested each predicate to ensure our game was working as intended. At a high level, we used test expect blocks and assert statements to check for edge cases and expected behavior. More specific info relating to each predicate can be found in the rummikub_test.frg file. 
