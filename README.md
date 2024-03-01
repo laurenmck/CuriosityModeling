@@ -36,8 +36,8 @@ The first player's initial move must meet a certain requirement:
 
 ##### What is a valid set?
 A valid set is a group or run of tiles
---<b>RUN</b>: a set of three or more consectutive numbers all in the same color.
---<b>GROUP</b>: 3 or 4 tiles that have are the same value and are different colors.
+-- RUN: a set of three or more consectutive numbers all in the same color.
+-- GROUP: 3 or 4 tiles that have are the same value and are different colors.
 
 To view the full rules of the game please visit [this](https://rummikub.com/wp-content/uploads/2019/12/2600-English-1.pdf) site. 
 
